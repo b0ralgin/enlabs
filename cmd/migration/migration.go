@@ -3,7 +3,10 @@ package migration
 import (
 	"enlabs/config"
 	"enlabs/db"
+
+	//migration
 	_ "enlabs/db/migrations"
+
 	"github.com/pkg/errors"
 	"github.com/pressly/goose"
 	"github.com/urfave/cli"

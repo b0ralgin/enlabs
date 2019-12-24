@@ -82,6 +82,7 @@ func (p *Postgres) inTx(fn func(t *sqlx.Tx) error) error {
 	return tx.Commit()
 }
 
+//GetConn get sql.DB struct
 func (p *Postgres) GetConn() *sql.DB {
 	return p.db.DB
 }
