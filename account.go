@@ -1,9 +1,11 @@
 package enlabs
 
+//Account account model
 type Account struct {
 	Balance int
 }
 
+//GetBalance count balance
 func GetBalance(amounts []int) int {
 	if len(amounts) == 0 {
 		panic("empty amounts array")

@@ -5,6 +5,7 @@ import (
 	"enlabs/db"
 	"enlabs/pkg/account"
 	"enlabs/pkg/api"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"

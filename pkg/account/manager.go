@@ -3,6 +3,7 @@ package account
 import (
 	"enlabs"
 	"enlabs/db"
+
 	"github.com/pkg/errors"
 )
 
@@ -25,11 +26,13 @@ func (a manager) AddTransaction(t *enlabs.Transaction) error {
 	return nil
 }
 
+//Manager account managing interface
 type Manager interface {
 	GetBalance() (int, error)
 	AddTransaction(t *enlabs.Transaction) error
 }
 
+//NewAccountManager initialize manager
 func NewAccountManager(db db.Keeper) Manager {
 	return &manager{db}
 }

@@ -3,9 +3,10 @@ package api
 import (
 	"enlabs"
 	"enlabs/pkg/account"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 const sourceTypeHeader = "Source-Type"
@@ -22,6 +23,7 @@ func (hs *httpServer) Run(addr string) error {
 	return router.Run(addr)
 }
 
+//HTTPServer http server
 type HTTPServer interface {
 	Run(addr string) error
 }
@@ -53,9 +55,11 @@ func (hs *httpServer) getBalance(g *gin.Context) {
 		g.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
 	g.JSON(http.StatusOK, balance)
 }
 
+//NewHTTPServer initialize http server
 func NewHTTPServer(am account.Manager, log *logrus.Entry) HTTPServer {
 	return &httpServer{
 		am:  am,

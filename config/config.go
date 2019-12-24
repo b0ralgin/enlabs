@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//AppConfig configuration variables
 type AppConfig struct {
 	DSN      string `envconfig:"dsn"`
 	LogLevel string `envconfig:"log_level"`
