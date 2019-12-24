@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"enlabs"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -42,11 +43,11 @@ func (p *Postgres) GetAmounts() ([]int, error) {
 			Amount int
 		}
 		res := tx.QueryRow("SELECT last_id, balance FROM account")
-		if err := res.Scan(&balance.LastID, &balance.Amount); err != nil {
+		if err := res.Scan(&balance.LastID, &balance.Amount); err != nil && err != sql.ErrNoRows {
 			return errors.Wrap(err, "can't get balance")
 		}
 		trans = append(trans, balance.Amount)
-		err := tx.Select(trans, "SELECT amount FROM transactions where id > $1", balance.LastID)
+		err := tx.Select(&trans, "SELECT amount FROM transactions where id > $1", balance.LastID)
 		if err != nil {
 			return errors.Wrap(err, "can't get transactions")
 		}

@@ -19,6 +19,9 @@ type Transaction struct {
 }
 
 func NewTransaction(id string, amount int, state State, source Source) *Transaction {
+	if state == Lost {
+		amount = -amount
+	}
 	return &Transaction{
 		ID:     id,
 		Amount: amount,
