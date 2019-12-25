@@ -13,7 +13,7 @@ func init() {
 
 //Up20191224085213 ...
 func Up20191224085213(tx *sql.Tx) error {
-	_, err := tx.Exec(`CREATE INDEX amount_idx ON transactions(id, amount);`)
+	_, err := tx.Exec(`CREATE INDEX amount_idx ON transactions(internal_id, amount);`)
 	if err != nil {
 		return err
 	}

@@ -37,7 +37,8 @@ func startRouter(c *cli.Context) error {
 		return errors.Wrap(dbErr, "can't connect to DB")
 	}
 	am := account.NewAccountManager(db)
-	hs := api.NewHTTPServer(am, log.WithField("api", "http"))
+	ct := account.NewCorrector(db)
+	hs := api.NewHTTPServer(am, ct, log.WithField("api", "http"))
 	if err := hs.Run(cfg.Addr); err != nil {
 		return errors.Wrap(err, "http server has stopped")
 	}

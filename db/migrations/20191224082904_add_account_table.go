@@ -14,7 +14,7 @@ func init() {
 //Up20191224082904 ...
 func Up20191224082904(tx *sql.Tx) error {
 	_, err := tx.Exec(`CREATE TABLE account (
-    last_id varchar(20) not null,
+    last_id integer not null,
     balance integer not null
     )`)
 	if err != nil {

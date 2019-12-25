@@ -23,6 +23,7 @@ const PaymentSource = "payment"
 
 //Transaction model
 type Transaction struct {
+	IntID  int
 	ID     string
 	Amount int
 	State  State

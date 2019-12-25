@@ -6,16 +6,16 @@ type Account struct {
 }
 
 //GetBalance count balance
-func GetBalance(amounts []int) int {
-	if len(amounts) == 0 {
+func GetBalance(trans []Transaction) int {
+	if len(trans) == 0 {
 		panic("empty amounts array")
 	}
-	inBalance := amounts[0]
-	for _, amount := range amounts[1:] {
-		inBalance += amount
-		if inBalance < 0 {
-			inBalance = 0
+	newBalance := trans[0].Amount
+	for _, tran := range trans {
+		newBalance += tran.Amount
+		if newBalance < 0 {
+			newBalance = 0
 		}
 	}
-	return inBalance
+	return newBalance
 }

@@ -15,6 +15,7 @@ func init() {
 func Up20191224082132(tx *sql.Tx) error {
 	_, err := tx.Exec(`CREATE TABLE transactions (
                       id varchar(50) NOT NULL,
+                      internal_id SERIAL,
                       amount integer not null,
                       state varchar(20) not null,
                       source varchar(20) not null,

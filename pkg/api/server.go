@@ -13,6 +13,7 @@ const sourceTypeHeader = "Source-Type"
 
 type httpServer struct {
 	am  account.Manager
+	ct  account.Corrector
 	log *logrus.Entry
 }
 
@@ -20,6 +21,7 @@ func (hs *httpServer) Run(addr string) error {
 	router := gin.Default()
 	router.GET("/balance", hs.getBalance)
 	router.POST("/transaction", hs.addTransaction)
+	router.POST("/update", hs.correctBalance)
 	return router.Run(addr)
 }
 
@@ -59,10 +61,25 @@ func (hs *httpServer) getBalance(g *gin.Context) {
 	g.JSON(http.StatusOK, balance)
 }
 
+func (hs *httpServer) correctBalance(g *gin.Context) {
+	if err := hs.ct.CorrectBalance(); err != nil {
+		hs.log.WithError(err).Error("can't correct balance")
+		g.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if err := hs.ct.UpdateBalance(); err != nil {
+		hs.log.WithError(err).Error("can't update balance")
+		g.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	g.Redirect(http.StatusFound, "/balance")
+}
+
 //NewHTTPServer initialize http server
-func NewHTTPServer(am account.Manager, log *logrus.Entry) HTTPServer {
+func NewHTTPServer(am account.Manager, ct account.Corrector, log *logrus.Entry) HTTPServer {
 	return &httpServer{
 		am:  am,
+		ct:  ct,
 		log: log,
 	}
 }
