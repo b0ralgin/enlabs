@@ -31,7 +31,7 @@ func startMigration(c *cli.Context) error {
 		return errors.Wrap(dbErr, "can't connect to DB")
 	}
 
-	err := goose.Up(db.GetConn(), "db/migrations")
+	err := goose.Up(db.GetConn(), "./")
 	if err != nil {
 		return errors.Wrap(err, "can't perfrom migration")
 	}

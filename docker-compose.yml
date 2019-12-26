@@ -6,6 +6,8 @@ services:
     image: 'enlabs:latest'
     container_name: 'migrate'
     command: ./enlabs migrate
+    env_file:
+      - env.list
     depends_on:
       - 'db'
 
@@ -13,6 +15,8 @@ services:
     image: 'enlabs:latest'
     container_name: 'server'
     command: ./enlabs server
+    env_file:
+      - env.list
     ports:
       - 8080:8080
     depends_on:
@@ -21,6 +25,8 @@ services:
   corrector:
     image: 'enlabs:latest'
     container_name: 'corrector'
+    env_file:
+      - env.list
     command: ./enlabs corrector
     depends_on:
       - 'db'
