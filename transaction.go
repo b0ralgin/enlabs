@@ -1,5 +1,7 @@
 package enlabs
 
+import "time"
+
 //State state of transaction
 type State string
 
@@ -23,11 +25,12 @@ const PaymentSource = "payment"
 
 //Transaction model
 type Transaction struct {
-	IntID  int
-	ID     string
-	Amount int
-	State  State
-	Source Source
+	IntID     int
+	CreatedAt time.Time
+	ID        string
+	Amount    int
+	State     State
+	Source    Source
 }
 
 //NewTransaction create new transaction
@@ -41,4 +44,12 @@ func NewTransaction(id string, amount int, state State, source Source) *Transact
 		State:  state,
 		Source: source,
 	}
+}
+
+func (t Transaction) CalcBalance(balance int) int {
+	newBalance := balance + t.Amount
+	if newBalance < 0 {
+		newBalance = 0
+	}
+	return newBalance
 }

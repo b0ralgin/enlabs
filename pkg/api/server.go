@@ -67,7 +67,7 @@ func (hs *httpServer) correctBalance(g *gin.Context) {
 		g.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	if err := hs.ct.UpdateBalance(); err != nil {
+	if err := hs.ct.CorrectBalance(); err != nil {
 		hs.log.WithError(err).Error("can't update balance")
 		g.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -12,15 +12,11 @@ type manager struct {
 }
 
 func (a manager) GetBalance() (res int, err error) {
-	err = a.db.InTx(func(tx db.DBTX) error {
-		amounts, err := a.db.GetAmounts(tx)
-		if err != nil {
-			return errors.Wrap(err, "can't get balance")
-		}
-		res = enlabs.GetBalance(amounts)
-		return nil
-	})
-	return
+	balance, err := a.db.GetBalance()
+	if err != nil {
+		return 0, errors.Wrap(err, "can't get balance")
+	}
+	return balance, nil
 }
 
 func (a manager) AddTransaction(t *enlabs.Transaction) error {
@@ -31,35 +27,33 @@ func (a manager) AddTransaction(t *enlabs.Transaction) error {
 }
 
 func (a manager) CorrectBalance() error {
-	err := a.db.InTx(func(tx db.DBTX) error {
-		if err := a.db.DeleteOddTransactions(tx); err != nil {
-			return err
-		}
-		return nil
-	})
+	tx, err := a.db.BeginTx()
 	if err != nil {
-		return errors.Wrap(err, "can't correct balance")
+		return errors.Wrap(err, "can't create tx for balance correction")
 	}
-	return nil
-}
-
-func (a manager) UpdateBalance() error {
-	err := a.db.InTx(func(tx db.DBTX) error {
-		amounts, err := a.db.GetAmounts(tx)
-		if err != nil {
-			return errors.Wrap(err, "can't get balance")
-		}
-		lastTran := amounts[len(amounts)-1]
-		lastTran.Amount = enlabs.GetBalance(amounts)
-		if err := a.db.UpdateBalance(tx, lastTran); err != nil {
-			return errors.Wrap(err, "can't update balance")
-		}
-		return nil
-	})
+	defer tx.Rollback()
+	balance, err := tx.GetBalance()
 	if err != nil {
-		return errors.Wrap(err, "failed to update balance")
+		return errors.Wrap(err, "can't get balance")
 	}
-	return nil
+	trans, err := tx.GetLastN(10)
+	if err != nil {
+		return errors.Wrap(err, "can't get transactions")
+	}
+	for i, t := range trans {
+		if i%2 == 0 {
+			continue
+		}
+		if err := tx.DeleteTransaction(t); err != nil {
+			return errors.Wrapf(err, "can't delete transaction %s", t.ID)
+		}
+		t.Amount = -t.Amount
+		balance = t.CalcBalance(balance)
+	}
+	if err := tx.UpdateBalance(balance); err != nil {
+		return errors.Wrap(err, "can't update balance")
+	}
+	return errors.Wrap(tx.Commit(), "can't commit balance correction")
 }
 
 //Manager account managing interface
@@ -70,7 +64,6 @@ type Manager interface {
 
 type Corrector interface {
 	CorrectBalance() error
-	UpdateBalance() error
 }
 
 //NewAccountManager initialize manager
