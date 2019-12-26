@@ -31,6 +31,7 @@ func NewPostgresClient(dsn string) (*Postgres, error) {
 	return &Postgres{conn}, nil
 }
 
+//BeginTx return new tx
 func (p *Postgres) BeginTx() (TXer, error) {
 	tx, err := p.db.Beginx()
 	if err != nil {
@@ -39,6 +40,7 @@ func (p *Postgres) BeginTx() (TXer, error) {
 	return &TX{tx}, nil
 }
 
+//GetConn get direct sql interface
 func (p *Postgres) GetConn() *sql.DB {
 	return p.db.DB
 }
@@ -50,7 +52,7 @@ func (p *Postgres) AddTransaction(t *enlabs.Transaction) error {
 		return errors.Wrap(err, "can't begin transaction")
 	}
 	trx := TX{tx}
-	defer tx.Rollback()
+	defer tx.Rollback() //nolint:errcheck
 	balance, getBalErr := trx.GetBalance()
 	if getBalErr != nil {
 		return getBalErr
@@ -67,7 +69,7 @@ func (p *Postgres) AddTransaction(t *enlabs.Transaction) error {
 	return tx.Commit()
 }
 
-//GetAmounts get amounts of transactions
+//GetBalance get balance of account
 func (p *Postgres) GetBalance() (int, error) {
 	tx, err := p.BeginTx()
 	if err != nil {

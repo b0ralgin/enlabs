@@ -10,6 +10,7 @@ type AppConfig struct {
 	DSN      string `envconfig:"dsn"`
 	LogLevel string `envconfig:"log_level"`
 	Addr     string `envconfig:"addr"`
+	Period   uint64 `envconfig:"period"`
 }
 
 // LoadConfig ...

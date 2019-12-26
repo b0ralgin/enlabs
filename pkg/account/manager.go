@@ -62,6 +62,7 @@ type Manager interface {
 	AddTransaction(t *enlabs.Transaction) error
 }
 
+//Corrector interface for manager
 type Corrector interface {
 	CorrectBalance() error
 }
@@ -71,6 +72,7 @@ func NewAccountManager(db db.Keeper) Manager {
 	return &manager{db}
 }
 
+//NewCorrector initialize corrector manager
 func NewCorrector(db db.Keeper) Corrector {
 	return &manager{db}
 }

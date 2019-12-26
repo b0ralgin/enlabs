@@ -46,6 +46,7 @@ func NewTransaction(id string, amount int, state State, source Source) *Transact
 	}
 }
 
+//CalcBalance calculate new account balance
 func (t Transaction) CalcBalance(balance int) int {
 	newBalance := balance + t.Amount
 	if newBalance < 0 {

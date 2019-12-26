@@ -1,6 +1,7 @@
 package main
 
 import (
+	"enlabs/cmd/corrector"
 	"enlabs/cmd/migration"
 	"enlabs/cmd/server"
 	"os"
@@ -14,6 +15,7 @@ func main() {
 	app.Commands = []cli.Command{
 		server.StartHTTPServerCommand(),
 		migration.StartMigrationCommand(),
+		corrector.StartCorrectorCommand(),
 	}
 
 	if runErr := app.Run(os.Args); runErr != nil {

@@ -1,0 +1,32 @@
+version: '2'
+
+services:
+
+  migrate:
+    image: 'enlabs:latest'
+    container_name: 'migrate'
+    command: ./enlabs migrate
+    depends_on:
+      - 'db'
+
+  server:
+    image: 'enlabs:latest'
+    container_name: 'server'
+    command: ./enlabs server
+    ports:
+      - 8080:8080
+    depends_on:
+      - 'db'
+
+  corrector:
+    image: 'enlabs:latest'
+    container_name: 'corrector'
+    command: ./enlabs corrector
+    depends_on:
+      - 'db'
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
