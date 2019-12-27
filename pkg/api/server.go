@@ -2,6 +2,7 @@ package api
 
 import (
 	"enlabs"
+	"enlabs/db"
 	"enlabs/pkg/account"
 	"net/http"
 
@@ -13,7 +14,6 @@ const sourceTypeHeader = "Source-Type"
 
 type httpServer struct {
 	am  account.Manager
-	ct  account.Corrector
 	log *logrus.Entry
 }
 
@@ -21,7 +21,6 @@ func (hs *httpServer) Run(addr string) error {
 	router := gin.Default()
 	router.GET("/balance", hs.getBalance)
 	router.POST("/transaction", hs.addTransaction)
-	router.POST("/update", hs.correctBalance)
 	return router.Run(addr)
 }
 
@@ -42,7 +41,12 @@ func (hs *httpServer) addTransaction(g *gin.Context) {
 		_ = g.AbortWithError(http.StatusBadRequest, mapErr)
 		return
 	}
-	if err := hs.am.AddTransaction(tran); err != nil {
+	err := hs.am.AddTransaction(tran)
+	if err == db.DuplicateErr {
+		hs.log.Infof("duplicate transaction %s", tran.ID)
+		g.AbortWithStatus(http.StatusBadRequest)
+	}
+	if err != nil {
 		hs.log.WithError(err).Errorf("can't add transaction %s", req.ID)
 		g.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -61,25 +65,10 @@ func (hs *httpServer) getBalance(g *gin.Context) {
 	g.JSON(http.StatusOK, balance)
 }
 
-func (hs *httpServer) correctBalance(g *gin.Context) {
-	if err := hs.ct.CorrectBalance(); err != nil {
-		hs.log.WithError(err).Error("can't correct balance")
-		g.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	if err := hs.ct.CorrectBalance(); err != nil {
-		hs.log.WithError(err).Error("can't update balance")
-		g.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	g.Redirect(http.StatusFound, "/balance")
-}
-
 //NewHTTPServer initialize http server
-func NewHTTPServer(am account.Manager, ct account.Corrector, log *logrus.Entry) HTTPServer {
+func NewHTTPServer(am account.Manager, log *logrus.Entry) HTTPServer {
 	return &httpServer{
 		am:  am,
-		ct:  ct,
 		log: log,
 	}
 }

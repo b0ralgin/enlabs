@@ -36,6 +36,6 @@ func startCorrector(c *cli.Context) error {
 	if dbErr != nil {
 		return errors.Wrap(dbErr, "can't connect to DB")
 	}
-	ct := account.NewCorrector(db)
+	ct := account.NewCorrector(db, logrus.NewEntry(log))
 	return scheduler.RunScheduler(ct, cfg.Period)
 }

@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"enlabs"
 
+	"github.com/lib/pq"
+
 	"github.com/jmoiron/sqlx"
 	//sql driver import
 	_ "github.com/lib/pq"
@@ -13,6 +15,16 @@ import (
 //Postgres client of DB
 type Postgres struct {
 	db *sqlx.DB
+}
+
+//PgErr errors wrapper to DB errors
+type PgErr string
+
+//DuplicateErr error about inserting record with existing key
+const DuplicateErr = PgErr("duplicate id")
+
+func (pg PgErr) Error() string {
+	return string(pg)
 }
 
 //Keeper interface for repository
@@ -61,7 +73,7 @@ func (p *Postgres) AddTransaction(t *enlabs.Transaction) error {
 			VALUES (:id,:amount,:state, :source)`,
 		t)
 	if addTranErr != nil {
-		return errors.Wrap(addTranErr, "can't insert transaction")
+		return checkDuplicatesErr(addTranErr)
 	}
 	if err := trx.UpdateBalance(t.CalcBalance(balance)); err != nil {
 		return err
@@ -77,4 +89,14 @@ func (p *Postgres) GetBalance() (int, error) {
 	}
 	defer tx.Rollback()
 	return tx.GetBalance()
+}
+
+func checkDuplicatesErr(err error) error {
+	if pgerr, ok := err.(*pq.Error); ok {
+		if pgerr.Code == "23505" {
+			return DuplicateErr
+		}
+		return err
+	}
+	return err
 }
